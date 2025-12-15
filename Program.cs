@@ -3,11 +3,11 @@ using Microsoft.OpenApi.Models;
 using PizzaStore.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("Pizzas") ?? "Data Source=Pizzas.db";
 
 // EF Core InMemory
-builder.Services.AddDbContext<PizzaDb>(
-    options => options.UseInMemoryDatabase("items")
-);
+builder.Services.AddSqlite<PizzaDb>(connectionString);
+
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
@@ -46,10 +46,7 @@ app.MapPost("/pizza", async (PizzaDb db, Pizza pizza) =>
     return Results.Created($"/pizza/{pizza.Id}", pizza);
 });
 
-// GET by id
-app.MapGet("/pizza/{id}", async (PizzaDb db, int id) =>
-    await db.Pizzas.FindAsync(id)
-);
+
 
 // PUT
 app.MapPut("/pizza/{id}", async (PizzaDb db, Pizza updatepizza, int id) =>
